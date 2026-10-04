@@ -342,12 +342,30 @@ with its method, 1-based line and 0-based column.
 
 ## Compared with other tools
 
-- **esbuild `drop: ['console']`** removes every console method, including `warn` and `error`,
-  and drops their arguments, so `console.log(i++)` also loses the `i++`.
-- **Terser `drop_console`** only runs when you minify, and it also drops arguments, so
-  `console.log(i++)` loses the `i++` there too.
-- **strip-console** chooses methods, keeps side effects, works in unminified builds, and can audit
-  output you did not build yourself.
+Output of each tool on the same input, with `warn` and `error` kept where the tool allows it
+(esbuild has no per-method setting):
+
+| Input | strip-console | esbuild `drop` | Terser `drop_console` | babel remove-console |
+| --- | --- | --- | --- | --- |
+| `console.log(i++)` | `i++` | removed, `i++` lost | `void 0`, `i++` lost | removed, `i++` lost |
+| `console.warn('slow')` | kept | removed | kept | kept |
+| `/* keep */ console.log(id)` | kept | removed | removed | removed |
+| `const { log } = console; log(x)` | removed | kept | kept | kept |
+| `function f(console) { console.log(1) }` | kept | kept | kept | kept |
+
+Time to process 881 files (28.8 MB) from TypeScript, webpack, Rollup, Vite, Rolldown, Rspack and
+magic-string, best of three runs on a 4-core Linux machine with Node.js 22:
+
+| Tool | Time |
+| --- | --- |
+| strip-console | 3.1 s |
+| esbuild `drop` | 3.7 s |
+| babel-plugin-transform-remove-console | 12.5 s |
+| Terser `drop_console` (compress only, no mangling) | 14.8 s |
+
+The other tools reprint the whole file; strip-console only edits the calls it removes, so
+everything else stays byte for byte the same. strip-console can also audit output you did not
+build yourself. Run `pnpm bench` to reproduce these numbers.
 
 Removing console calls hides output in browser DevTools. It does not protect secrets: anything in
 your bundle or sent over the network is still readable.
