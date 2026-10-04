@@ -29,6 +29,8 @@ console.warn('slow');
 - [Bundler plugin](#bundler-plugin)
 - [CLI](#cli)
 - [Audit in CI](#audit-in-ci)
+- [Next.js](#nextjs)
+- [Angular](#angular)
 - [What gets removed](#what-gets-removed)
 - [Options](#options)
 - [JavaScript API](#javascript-api)
@@ -237,6 +239,53 @@ The same check works as a script in `package.json`:
 
 Use `--json` to feed the report into another tool. It contains `scanned`, `calls`, a `files` list
 with each call's method, line and column, and an `errors` list for files that could not be parsed.
+
+## Next.js
+
+Next.js 16 builds with Turbopack, which does not run bundler plugins, so run the CLI on the
+browser output after `next build`:
+
+```json
+{
+  "scripts": {
+    "build": "next build && strip-console .next/static"
+  }
+}
+```
+
+`.next/static` holds only the code sent to the browser, so server-side logs stay. Add
+`strip-console audit .next/static` to CI to check the result.
+
+If you build with webpack (`next build --webpack`), you can use the plugin instead. Add it to client
+production builds only:
+
+```js
+// next.config.mjs
+import stripConsole from 'strip-console/webpack';
+
+export default {
+  webpack(config, { dev, isServer }) {
+    if (!dev && !isServer) config.plugins.push(stripConsole());
+    return config;
+  },
+};
+```
+
+## Angular
+
+The Angular CLI's esbuild builder does not take extra plugins, so run the CLI on the browser output
+after `ng build`. Replace `my-app` with the project name from `angular.json`:
+
+```json
+{
+  "scripts": {
+    "build": "ng build && strip-console dist/my-app/browser"
+  }
+}
+```
+
+This also removes `console.log` calls inside Angular's own production code. Add
+`strip-console audit dist/my-app/browser` to CI to check the result.
 
 ## What gets removed
 
