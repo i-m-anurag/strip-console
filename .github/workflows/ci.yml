@@ -39,3 +39,9 @@ jobs:
           if node dist/cli.mjs audit "$RUNNER_TEMP/app"; then echo "audit should fail before stripping"; exit 1; fi
           node dist/cli.mjs "$RUNNER_TEMP/app"
           node dist/cli.mjs audit "$RUNNER_TEMP/app"
+      - name: Check the CLI exits 2 on bad options
+        run: |
+          set +e
+          node dist/cli.mjs audit "$RUNNER_TEMP/app" --metods log; test $? -eq 2 || exit 1
+          echo '{"metods": ["log"]}' > "$RUNNER_TEMP/bad.json"
+          node dist/cli.mjs audit "$RUNNER_TEMP/app" --config "$RUNNER_TEMP/bad.json"; test $? -eq 2 || exit 1
