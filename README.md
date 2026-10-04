@@ -361,9 +361,8 @@ magic-string, best of three runs on a 4-core Linux machine with Node.js 22:
 | Terser `drop_console` (compress only, no mangling) | 14.8 s |
 
 The other tools reprint the whole file; strip-console only edits the calls it removes, so
-everything else stays byte for byte the same. Terser and esbuild also only do this as part of
-minifying or bundling, while strip-console works on unminified code and can audit output you did
-not build yourself. Run `pnpm bench` to reproduce these numbers.
+everything else stays byte for byte the same. strip-console can also audit output you did not
+build yourself. Run `pnpm bench` to reproduce these numbers.
 
 Removing console calls hides output in browser DevTools. It does not protect secrets: anything in
 your bundle or sent over the network is still readable.
