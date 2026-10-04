@@ -1,3 +1,5 @@
+import { CORE_SCHEMA, validateOptions } from './validate';
+
 export interface StripConsoleOptions {
   /** Console methods to remove. Default: `['log', 'debug', 'info', 'trace']`. */
   methods?: string[];
@@ -25,6 +27,7 @@ export interface ResolvedOptions {
 export const DEFAULT_METHODS: readonly string[] = ['log', 'debug', 'info', 'trace'];
 
 export function resolveOptions(options: StripConsoleOptions = {}): ResolvedOptions {
+  validateOptions(options, CORE_SCHEMA);
   return {
     methods: new Set(options.methods ?? DEFAULT_METHODS),
     loggers: (options.loggers ?? []).map((path) => path.split('.')),
