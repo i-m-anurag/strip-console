@@ -131,9 +131,11 @@
     "webpack": "^5.111.1"
   },
   "dependencies": {
+    "@jridgewell/remapping": "^2.3.5",
     "cac": "^7.0.0",
     "magic-string": "^1.4.2",
     "oxc-parser": "^0.152.0",
+    "tinyglobby": "^0.2.17",
     "unplugin": "^3.4.0",
     "unplugin-utils": "^0.3.2"
   },
