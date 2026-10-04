@@ -10,6 +10,28 @@ Strip `console.*` calls from JavaScript and TypeScript code.
 npm install strip-console
 ```
 
+## Bundler plugin
+
+```js
+// vite.config.js
+import stripConsole from 'strip-console/vite';
+
+export default { plugins: [stripConsole()] };
+```
+
+| Bundler | Import |
+| --- | --- |
+| Vite | `strip-console/vite` (production builds only) |
+| Rollup | `strip-console/rollup` |
+| Rolldown | `strip-console/rolldown` |
+| webpack | `strip-console/webpack` |
+| Rspack | `strip-console/rspack` |
+| esbuild | `strip-console/esbuild` |
+
+The plugin takes the options below plus `include`, `exclude` (default: skip `node_modules`) and
+`chunks`. With `chunks: true`, Vite, Rollup and Rolldown also process the final output, which
+catches console calls from dependencies and compiled framework files.
+
 ## Usage
 
 ```js

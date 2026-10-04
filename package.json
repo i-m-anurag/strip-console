@@ -3,11 +3,16 @@
   "version": "0.0.1",
   "description": "Strip console.* calls from JavaScript and TypeScript code",
   "keywords": [
+    "build",
     "console",
-    "strip",
-    "remove",
     "console.log",
-    "build"
+    "esbuild-plugin",
+    "remove",
+    "rollup-plugin",
+    "strip",
+    "unplugin",
+    "vite-plugin",
+    "webpack-plugin"
   ],
   "author": "Anurag",
   "license": "MIT",
@@ -30,6 +35,66 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./vite": {
+      "import": {
+        "types": "./dist/vite.d.mts",
+        "default": "./dist/vite.mjs"
+      },
+      "require": {
+        "types": "./dist/vite.d.cts",
+        "default": "./dist/vite.cjs"
+      }
+    },
+    "./rollup": {
+      "import": {
+        "types": "./dist/rollup.d.mts",
+        "default": "./dist/rollup.mjs"
+      },
+      "require": {
+        "types": "./dist/rollup.d.cts",
+        "default": "./dist/rollup.cjs"
+      }
+    },
+    "./rolldown": {
+      "import": {
+        "types": "./dist/rolldown.d.mts",
+        "default": "./dist/rolldown.mjs"
+      },
+      "require": {
+        "types": "./dist/rolldown.d.cts",
+        "default": "./dist/rolldown.cjs"
+      }
+    },
+    "./webpack": {
+      "import": {
+        "types": "./dist/webpack.d.mts",
+        "default": "./dist/webpack.mjs"
+      },
+      "require": {
+        "types": "./dist/webpack.d.cts",
+        "default": "./dist/webpack.cjs"
+      }
+    },
+    "./rspack": {
+      "import": {
+        "types": "./dist/rspack.d.mts",
+        "default": "./dist/rspack.mjs"
+      },
+      "require": {
+        "types": "./dist/rspack.d.cts",
+        "default": "./dist/rspack.cjs"
+      }
+    },
+    "./esbuild": {
+      "import": {
+        "types": "./dist/esbuild.d.mts",
+        "default": "./dist/esbuild.mjs"
+      },
+      "require": {
+        "types": "./dist/esbuild.d.cts",
+        "default": "./dist/esbuild.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -37,7 +102,7 @@
   ],
   "sideEffects": false,
   "engines": {
-    "node": ">=22"
+    "node": ">=22.12.0"
   },
   "packageManager": "pnpm@10.28.0",
   "scripts": {
@@ -53,16 +118,24 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
     "@biomejs/biome": "^2.5.15",
+    "@rspack/core": "^2.2.8",
     "@types/node": "^22.20.5",
+    "esbuild": "^0.28.2",
     "publint": "^0.3.25",
+    "rolldown": "^1.2.12",
+    "rollup": "^4.64.0",
     "tsdown": "^0.23.0",
     "typescript": "^5.9.3",
-    "vitest": "^5.0.3"
+    "vite": "^8.3.2",
+    "vitest": "^5.0.3",
+    "webpack": "^5.111.1"
   },
   "dependencies": {
     "cac": "^7.0.0",
     "magic-string": "^1.4.2",
-    "oxc-parser": "^0.152.0"
+    "oxc-parser": "^0.152.0",
+    "unplugin": "^3.4.0",
+    "unplugin-utils": "^0.3.2"
   },
   "bin": {
     "strip-console": "./dist/cli.mjs"
