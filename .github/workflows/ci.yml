@@ -30,3 +30,9 @@ jobs:
           node -e "const r = require('./dist/index.cjs').transform('console.log(1);x()'); if (r.code !== 'x()') throw new Error(r.code)"
           node --input-type=module -e "import { transform } from './dist/index.mjs'; const r = transform('console.log(1);x()'); if (r.code !== 'x()') throw new Error(r.code)"
           node -e "if (typeof require('./dist/webpack.cjs') !== 'function') throw new Error('bad webpack export')"
+      - name: Smoke-test the CLI
+        run: |
+          cp -r test/fixtures/app "$RUNNER_TEMP/app"
+          if node dist/cli.mjs audit "$RUNNER_TEMP/app"; then echo "audit should fail before stripping"; exit 1; fi
+          node dist/cli.mjs "$RUNNER_TEMP/app"
+          node dist/cli.mjs audit "$RUNNER_TEMP/app"

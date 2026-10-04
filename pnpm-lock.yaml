@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@jridgewell/remapping':
+        specifier: ^2.3.5
+        version: 2.3.5
       cac:
         specifier: ^7.0.0
         version: 7.0.0
@@ -17,6 +20,9 @@ importers:
       oxc-parser:
         specifier: ^0.152.0
         version: 0.152.0
+      tinyglobby:
+        specifier: ^0.2.17
+        version: 0.2.17
       unplugin:
         specifier: ^3.4.0
         version: 3.4.0(@rspack/core@2.2.8)(esbuild@0.28.2)(rolldown@1.2.12)(rollup@4.64.0)(vite@8.3.2(@types/node@22.20.5)(esbuild@0.28.2)(terser@5.51.2))(webpack@5.111.1(esbuild@0.28.2))

@@ -32,6 +32,22 @@ The plugin takes the options below plus `include`, `exclude` (default: skip `nod
 `chunks`. With `chunks: true`, Vite, Rollup and Rolldown also process the final output, which
 catches console calls from dependencies and compiled framework files.
 
+## CLI
+
+Strip an existing build output folder, or check it in CI:
+
+```bash
+npx strip-console dist/          # rewrite .js/.mjs/.cjs files in place, keeping .map files in sync
+npx strip-console dist/ --dry-run
+npx strip-console audit dist/    # list remaining calls; exits 1 if any are found
+npx strip-console audit dist/ --json
+```
+
+Flags mirror the options below (`--methods log,debug`, `--loggers logger.debug`, `--keep-comment`,
+`--no-debugger`, `--include`, `--exclude`). Settings can also live in `strip-console.config.json`,
+`strip-console.config.mjs`, or a `"stripConsole"` key in `package.json`, with a `dirs` list for the
+default folders.
+
 ## Usage
 
 ```js
