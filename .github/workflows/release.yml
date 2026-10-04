@@ -1,0 +1,57 @@
+name: Release
+
+# Runs only when started by hand from the Actions tab, after the version bump is merged to main.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write # push the version tag and create the GitHub release
+  id-token: write # npm provenance and trusted publishing
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm check:pkg
+
+      - name: Check the version is not published yet
+        id: version
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if npm view "strip-console@$version" version >/dev/null 2>&1; then
+            echo "strip-console@$version is already on npm. Run 'pnpm version-packages' and merge the bump first."
+            exit 1
+          fi
+          if [ -n "$(ls .changeset/*.md 2>/dev/null | grep -v README.md)" ]; then
+            echo "Unreleased changesets are still in .changeset/. Run 'pnpm version-packages' and merge the bump first."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        env:
+          # Leave the NPM_TOKEN secret unset when the package uses npm trusted publishing.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Tag and create the GitHub release
+        run: |
+          tag="v${{ steps.version.outputs.version }}"
+          awk -v v="## ${{ steps.version.outputs.version }}" '$0 == v {on=1; next} /^## / {on=0} on' CHANGELOG.md > notes.md
+          git tag "$tag"
+          git push origin "$tag"
+          gh release create "$tag" --title "$tag" --notes-file notes.md
+        env:
+          GH_TOKEN: ${{ github.token }}
