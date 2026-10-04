@@ -296,6 +296,17 @@ pnpm typecheck   # tsc --noEmit
 pnpm build       # tsdown -> dist/ (ESM, CJS, types)
 ```
 
+### Releasing
+
+1. Add a changeset to each pull request that changes the package: `pnpm changeset`.
+2. When it is time to release, run `pnpm version-packages` on a branch. It bumps the version in
+   `package.json`, writes `CHANGELOG.md` and deletes the used changesets. Merge that branch.
+3. Start the **Release** workflow from the Actions tab. It runs every check, publishes to npm with
+   provenance, tags the commit and creates a GitHub release from the changelog.
+
+The workflow publishes with npm trusted publishing when the package is set up for it on npmjs.com,
+or with an `NPM_TOKEN` repository secret otherwise.
+
 ## License
 
 MIT
