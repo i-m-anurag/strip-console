@@ -1,4 +1,4 @@
-import MagicString, { type SourceMap } from 'magic-string';
+import { MagicString, type SourceMap } from 'magic-string';
 import { parseSync } from 'oxc-parser';
 import { isNode, type Node, propertyName, unwrap } from './ast';
 import { type ResolvedOptions, resolveOptions, type StripConsoleOptions } from './options';

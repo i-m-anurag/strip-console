@@ -25,3 +25,8 @@ jobs:
       - run: pnpm build
       - run: pnpm check:pkg
       - run: node dist/cli.mjs --version
+      - name: Smoke-test the built package from CommonJS and ESM
+        run: |
+          node -e "const r = require('./dist/index.cjs').transform('console.log(1);x()'); if (r.code !== 'x()') throw new Error(r.code)"
+          node --input-type=module -e "import { transform } from './dist/index.mjs'; const r = transform('console.log(1);x()'); if (r.code !== 'x()') throw new Error(r.code)"
+          node -e "if (typeof require('./dist/webpack.cjs') !== 'function') throw new Error('bad webpack export')"
