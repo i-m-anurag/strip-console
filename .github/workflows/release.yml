@@ -40,8 +40,9 @@ jobs:
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
+      # npm only accepts provenance from public repositories, so it is skipped while this one is private.
       - name: Publish to npm
-        run: npm publish --provenance --access public
+        run: npm publish --access public ${{ !github.event.repository.private && '--provenance' || '' }}
         env:
           # Leave the NPM_TOKEN secret unset when the package uses npm trusted publishing.
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

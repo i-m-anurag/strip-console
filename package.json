@@ -147,6 +147,6 @@
     "unplugin-utils": "^0.3.2"
   },
   "bin": {
-    "strip-console": "./dist/cli.mjs"
+    "strip-console": "dist/cli.mjs"
   }
 }
