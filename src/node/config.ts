@@ -1,7 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import type { FileOptions } from './files';
+import { validateOptions } from '../core/validate';
+import { FILE_SCHEMA, type FileOptions } from './files';
 
 export interface CliConfig extends FileOptions {
   /** Directories to process when none are given on the command line. Default: `['dist']`. */
@@ -38,15 +39,29 @@ async function exists(file: string): Promise<boolean> {
  * `cwd`, else the `"stripConsole"` key of `cwd/package.json`. Returns `{}` when none exists.
  */
 export async function loadConfig(cwd: string, explicit?: string): Promise<CliConfig> {
-  if (explicit) return loadFile(resolve(cwd, explicit));
+  const { config, source } = await findConfig(cwd, explicit);
+  try {
+    validateOptions(config, { ...FILE_SCHEMA, dirs: 'string[]' });
+  } catch (error) {
+    throw new TypeError(`${(error as Error).message} (in ${source})`);
+  }
+  return config;
+}
+
+async function findConfig(
+  cwd: string,
+  explicit?: string,
+): Promise<{ config: CliConfig; source: string }> {
+  if (explicit) return { config: await loadFile(resolve(cwd, explicit)), source: explicit };
   for (const name of CONFIG_FILES) {
     const file = join(cwd, name);
-    if (await exists(file)) return loadFile(file);
+    if (await exists(file)) return { config: await loadFile(file), source: name };
   }
   const pkgFile = join(cwd, 'package.json');
   if (await exists(pkgFile)) {
     const pkg = (await readJson(pkgFile)) as { stripConsole?: CliConfig };
-    if (pkg.stripConsole) return pkg.stripConsole;
+    if (pkg.stripConsole)
+      return { config: pkg.stripConsole, source: 'package.json "stripConsole"' };
   }
-  return {};
+  return { config: {}, source: 'defaults' };
 }

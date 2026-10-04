@@ -4,6 +4,7 @@ import { createFilter, type FilterPattern } from 'unplugin-utils';
 import { createRuntimeGuard, prependGuard } from '../core/guard';
 import type { StripConsoleOptions } from '../core/options';
 import { transform } from '../core/transform';
+import { CORE_SCHEMA, type OptionSchema, validateOptions } from '../core/validate';
 
 export interface PluginOptions extends Omit<StripConsoleOptions, 'filename'> {
   /** Files to process. Default: JS, TS, JSX, TSX, Vue, Svelte and Astro modules. */
@@ -22,6 +23,15 @@ export interface PluginOptions extends Omit<StripConsoleOptions, 'filename'> {
    */
   runtimeGuard?: boolean;
 }
+
+const { filename: _filename, ...PLUGIN_CORE } = CORE_SCHEMA;
+const PLUGIN_SCHEMA: OptionSchema = {
+  ...PLUGIN_CORE,
+  include: 'pattern',
+  exclude: 'pattern',
+  chunks: 'boolean',
+  runtimeGuard: 'boolean',
+};
 
 const DEFAULT_INCLUDE = [/\.[cm]?[jt]sx?$/, /\.(vue|svelte|astro)$/];
 const DEFAULT_EXCLUDE = [/[\\/]node_modules[\\/]/];
@@ -43,6 +53,7 @@ export const unplugin: UnpluginInstance<PluginOptions | undefined, false> = crea
   PluginOptions | undefined,
   false
 >((options: PluginOptions = {}) => {
+  validateOptions(options, PLUGIN_SCHEMA);
   const {
     include = DEFAULT_INCLUDE,
     exclude = DEFAULT_EXCLUDE,

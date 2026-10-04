@@ -321,6 +321,9 @@ These apply to the plugin, the CLI and the JavaScript API.
 | `sourcemap` | `true` | Return a source map (API only) |
 | `filename` | `'input.js'` | Picks the parser and names the map source (API only) |
 
+Unknown options and values of the wrong type throw a `TypeError` that names the option, and suggest
+the right name for a typo such as `method`. The CLI exits with code 2 and names the config file.
+
 ## JavaScript API
 
 ```js

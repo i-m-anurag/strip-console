@@ -25,9 +25,9 @@ function list(value: string | string[] | undefined): string[] | undefined {
 }
 
 async function resolveOptions(dirs: string[], flags: Flags) {
-  const config: CliConfig = await loadConfig(process.cwd(), flags.config);
+  const { dirs: configDirs, ...config }: CliConfig = await loadConfig(process.cwd(), flags.config);
   return {
-    dirs: dirs.length > 0 ? dirs : (config.dirs ?? ['dist']),
+    dirs: dirs.length > 0 ? dirs : (configDirs ?? ['dist']),
     options: {
       ...config,
       methods: list(flags.methods) ?? config.methods,
@@ -134,4 +134,8 @@ withOptions(
 
 cli.help();
 cli.version(pkg.version);
-cli.parse();
+cli.parse(process.argv, { run: false });
+Promise.resolve(cli.runMatchedCommand()).catch((error: Error) => {
+  console.error(error.message);
+  process.exitCode = 2;
+});

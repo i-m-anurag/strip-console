@@ -4,6 +4,7 @@ import remapping from '@jridgewell/remapping';
 import { glob } from 'tinyglobby';
 import type { StripConsoleOptions } from '../core/options';
 import { type RemovedCall, transform } from '../core/transform';
+import { CORE_SCHEMA, type OptionSchema, validateOptions } from '../core/validate';
 
 export interface FileOptions extends Omit<StripConsoleOptions, 'filename' | 'sourcemap'> {
   /** Glob patterns, relative to each directory. Default: all `.js`, `.mjs` and `.cjs` files. */
@@ -31,6 +32,9 @@ export interface FilesResult {
   errors: FileError[];
 }
 
+const { filename: _filename, sourcemap: _sourcemap, ...FILE_CORE } = CORE_SCHEMA;
+export const FILE_SCHEMA: OptionSchema = { ...FILE_CORE, include: 'string[]', exclude: 'string[]' };
+
 const DEFAULT_INCLUDE = ['**/*.{js,mjs,cjs}'];
 const DEFAULT_EXCLUDE = ['**/node_modules/**'];
 
@@ -56,6 +60,7 @@ function coreOptions(options: FileOptions): StripConsoleOptions {
 
 /** Report console calls that would be removed, without changing any file. */
 export async function auditFiles(dirs: string[], options: FileOptions = {}): Promise<FilesResult> {
+  validateOptions(options, FILE_SCHEMA);
   const result: FilesResult = { scanned: 0, files: [], errors: [] };
   for (const file of await listFiles(dirs, options)) {
     result.scanned++;
@@ -82,6 +87,7 @@ export async function stripFiles(
   dirs: string[],
   options: FileOptions & { dryRun?: boolean } = {},
 ): Promise<FilesResult> {
+  validateOptions(options, { ...FILE_SCHEMA, dryRun: 'boolean' });
   const { dryRun = false, ...rest } = options;
   const result: FilesResult = { scanned: 0, files: [], errors: [] };
   for (const file of await listFiles(dirs, rest)) {
