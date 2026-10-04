@@ -135,7 +135,10 @@ withOptions(
 cli.help();
 cli.version(pkg.version);
 cli.parse(process.argv, { run: false });
-Promise.resolve(cli.runMatchedCommand()).catch((error: Error) => {
-  console.error(error.message);
-  process.exitCode = 2;
-});
+// cac throws for an unknown flag before the command runs, so start inside the promise to catch it.
+Promise.resolve()
+  .then(() => cli.runMatchedCommand())
+  .catch((error: Error) => {
+    console.error(error.message);
+    process.exitCode = 2;
+  });
