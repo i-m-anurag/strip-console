@@ -134,10 +134,26 @@ await build({
 | `include` | JS, TS, JSX, TSX, `.vue`, `.svelte`, `.astro` | Modules to process |
 | `exclude` | `node_modules` | Modules to skip |
 | `chunks` | `false` | Also process the final output chunks (Vite, Rollup and Rolldown only) |
+| `runtimeGuard` | `false` | Add a runtime stub that silences the removed methods (see below) |
 
 By default the plugin skips `node_modules`. Set `chunks: true` to also clean the bundled output,
 which catches console calls in dependencies and in compiled framework files. Files that fail to
 parse are skipped with a warning instead of failing the build.
+
+### Runtime guard
+
+Static removal cannot see calls whose method name is only known at runtime, such as
+`console[level](message)`. With `runtimeGuard: true`, the plugin adds a small script to the top of
+each entry chunk that replaces the listed `methods` with empty functions:
+
+```js
+stripConsole({ runtimeGuard: true });
+```
+
+The guard silences every call to those methods, including ones kept with a `/* keep */` comment,
+and leaves `console.warn` and `console.error` alone unless you list them. It works with every
+bundler above. For other setups, `createRuntimeGuard(methods)` from `strip-console` returns the
+script as a string, ready to inline at the top of your entry file.
 
 ## CLI
 

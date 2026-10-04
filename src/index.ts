@@ -1,3 +1,4 @@
+export { createRuntimeGuard } from './core/guard';
 export type { StripConsoleOptions } from './core/options';
 export { DEFAULT_METHODS } from './core/options';
 export type { RemovedCall, TransformResult } from './core/transform';

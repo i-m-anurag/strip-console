@@ -1,5 +1,7 @@
+import remapping from '@jridgewell/remapping';
 import { createUnplugin, type UnpluginInstance } from 'unplugin';
 import { createFilter, type FilterPattern } from 'unplugin-utils';
+import { createRuntimeGuard, prependGuard } from '../core/guard';
 import type { StripConsoleOptions } from '../core/options';
 import { transform } from '../core/transform';
 
@@ -13,6 +15,12 @@ export interface PluginOptions extends Omit<StripConsoleOptions, 'filename'> {
    * compiled framework files. Vite, Rollup and Rolldown only. Default: `false`.
    */
   chunks?: boolean;
+  /**
+   * Add a small script to each entry chunk that turns the listed `methods` into no-ops at runtime,
+   * catching calls static analysis cannot see such as `console[name]()`. It also silences calls
+   * kept with a `keep` comment. Default: `false`.
+   */
+  runtimeGuard?: boolean;
 }
 
 const DEFAULT_INCLUDE = [/\.[cm]?[jt]sx?$/, /\.(vue|svelte|astro)$/];
@@ -35,8 +43,15 @@ export const unplugin: UnpluginInstance<PluginOptions | undefined, false> = crea
   PluginOptions | undefined,
   false
 >((options: PluginOptions = {}) => {
-  const { include = DEFAULT_INCLUDE, exclude = DEFAULT_EXCLUDE, chunks = false, ...core } = options;
+  const {
+    include = DEFAULT_INCLUDE,
+    exclude = DEFAULT_EXCLUDE,
+    chunks = false,
+    runtimeGuard = false,
+    ...core
+  } = options;
   const filter = createFilter(include, exclude);
+  const guard = runtimeGuard ? createRuntimeGuard(core.methods) : undefined;
 
   const strip = (code: string, file: string, warn: (message: string) => void) => {
     try {
@@ -49,15 +64,24 @@ export const unplugin: UnpluginInstance<PluginOptions | undefined, false> = crea
     }
   };
 
-  const renderChunk = chunks
-    ? function (
-        this: { warn: (message: string) => void },
-        code: string,
-        chunk: { fileName: string },
-      ) {
-        return strip(code, chunk.fileName, (message) => this.warn(message));
-      }
-    : undefined;
+  const renderChunk =
+    chunks || guard
+      ? function (
+          this: { warn: (message: string) => void },
+          code: string,
+          chunk: { fileName: string; isEntry: boolean },
+        ) {
+          const stripped = chunks
+            ? strip(code, chunk.fileName, (message) => this.warn(message))
+            : null;
+          if (!guard || !chunk.isEntry) return stripped;
+          const guarded = prependGuard(stripped?.code ?? code, guard, chunk.fileName);
+          if (!stripped?.map) return { code: guarded.code, map: guarded.map.toString() };
+          // Chain the guard's map onto the strip map so both edits trace back to the original.
+          const map = remapping([guarded.map.toString(), stripped.map], () => null);
+          return { code: guarded.code, map: map.toString() };
+        }
+      : undefined;
 
   return {
     name: 'strip-console',
@@ -71,6 +95,25 @@ export const unplugin: UnpluginInstance<PluginOptions | undefined, false> = crea
     vite: { apply: 'build', renderChunk },
     rollup: { renderChunk },
     rolldown: { renderChunk },
+    webpack(compiler) {
+      if (guard) {
+        new compiler.webpack.BannerPlugin({ banner: guard, raw: true, entryOnly: true }).apply(
+          compiler,
+        );
+      }
+    },
+    rspack(compiler) {
+      if (guard) {
+        new compiler.rspack.BannerPlugin({ banner: guard, raw: true, entryOnly: true }).apply(
+          compiler,
+        );
+      }
+    },
+    esbuild: {
+      config(build) {
+        if (guard) build.banner = { ...build.banner, js: guard + (build.banner?.js ?? '') };
+      },
+    },
   };
 });
 
