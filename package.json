@@ -1,0 +1,22 @@
+{
+  "name": "strip-console",
+  "version": "0.0.1",
+  "description": "Strip console.* calls from JavaScript source code",
+  "main": "index.js",
+  "files": [
+    "index.js"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "console",
+    "strip",
+    "remove",
+    "console.log",
+    "build"
+  ],
+  "author": "Anurag",
+  "license": "MIT",
+  "type": "commonjs"
+}
