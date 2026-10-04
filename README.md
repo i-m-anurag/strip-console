@@ -3,8 +3,6 @@
 Strip `console.*` calls and `debugger` statements from JavaScript and TypeScript code, without
 breaking the code around them.
 
-> Early release. The API is not stable yet.
-
 ```js
 // before
 console.log('user', user);
@@ -35,6 +33,7 @@ console.warn('slow');
 - [Options](#options)
 - [JavaScript API](#javascript-api)
 - [Compared with other tools](#compared-with-other-tools)
+- [Versioning](#versioning)
 - [Development](#development)
 
 ## Install
@@ -348,6 +347,22 @@ with its method, 1-based line and 0-based column.
 
 Removing console calls hides output in browser DevTools. It does not protect secrets: anything in
 your bundle or sent over the network is still readable.
+
+## Versioning
+
+strip-console follows [semantic versioning](https://semver.org) from 1.0. These count as the public
+API, and changing them in an incompatible way needs a new major version:
+
+- the option names, their types and their defaults;
+- the exports of `strip-console` and its `/vite`, `/rollup`, `/rolldown`, `/webpack`, `/rspack`
+  and `/esbuild` entries;
+- the CLI commands, flags, config file names and exit codes (0 clean, 1 calls found or files
+  failed, 2 bad options);
+- the shape of the `--json` report and of `removed`.
+
+Removing a call that was wrongly kept, or keeping one that was wrongly removed, is a bug fix and
+ships in a patch release. The exact output formatting around a removed call may also change in a
+patch. Raising the minimum Node.js version needs a major release.
 
 ## Development
 
