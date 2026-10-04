@@ -24,6 +24,9 @@ jobs:
       - run: pnpm test
       - run: pnpm build
       - run: pnpm check:pkg
+      - name: Fuzz the transform on real packages
+        if: matrix.node == 24
+        run: pnpm fuzz
       - run: node dist/cli.mjs --version
       - name: Smoke-test the built package from CommonJS and ESM
         run: |
