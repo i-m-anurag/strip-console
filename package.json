@@ -1,6 +1,6 @@
 {
   "name": "strip-console",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Strip console.* calls from JavaScript and TypeScript code",
   "keywords": [
     "build",
