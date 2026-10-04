@@ -60,7 +60,9 @@
     "vitest": "^5.0.3"
   },
   "dependencies": {
-    "cac": "^7.0.0"
+    "cac": "^7.0.0",
+    "magic-string": "^1.4.2",
+    "oxc-parser": "^0.152.0"
   },
   "bin": {
     "strip-console": "./dist/cli.mjs"
